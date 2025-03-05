@@ -4,8 +4,8 @@ import HomeScreen from '../views/Home.vue'
 import StartScreen from '../views/Start.vue'
 
 const routes = [
+  { path: '/', component: StartScreen },
   { path: '/home', component: HomeScreen },
-  { path: '/', component: StartScreen }
 ]
 
 const router = createRouter({
