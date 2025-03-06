@@ -21,7 +21,7 @@
                         <img src="../assets/posture.png" class="art">
                         <h4 class="art-text">Gait Analysis</h4>
                     </div>
-                    <div class="test-box" @touchstart="isTouched = 'hand'" :class="{ active: isTouched == 'hand' }">
+                    <div class="test-box" @touchstart="isTouched = 'hand'" :class="{ active: isTouched == 'hand' }" @click="$router.push('/tremor')">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'hand'">
                         <img src="../assets/hand.png" class="art">
                         <h4 class="art-text">Tremor Detection</h4>
