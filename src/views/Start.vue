@@ -43,7 +43,7 @@ background-size: cover;
 }
 
 h1 {
-  color: #5d4037; /* Brown color for the header */
+  color: #eb4899;
   font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: 1px;
@@ -69,7 +69,7 @@ h1 {
 
 .emphasized {
   font-weight: 800;
-  color: #5d4037;
+  color: #eb4899;
 }
 
 .subtitle {
@@ -79,7 +79,7 @@ h1 {
 }
 
 .analyze-button {
-  background-color: #5C4231;
+  background-color: #eb4899;
   color: white;
   border: none;
   border-radius: 0.7rem;
