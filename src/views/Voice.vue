@@ -35,7 +35,7 @@
       </div>
       
       <Transition name="slide-up">
-        <div class="next-btn" v-if="hasRecorded" @click="complete">
+        <div class="next-btn" v-if="hasRecorded" @click="submitRecording">
           CONTINUE
         </div>
       </Transition>
@@ -43,87 +43,279 @@
   </template>
   
   <script setup>
-  import { ref, onMounted, computed } from 'vue';
-  
-  // State
-  const isRecording = ref(false);
-  const hasRecorded = ref(false);
-  const transcript = ref('');
-  const recognition = ref(null);
-  const promptText = "IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK";
-  const promptWords = computed(() => promptText.split(' '));
-  const spokenWordIndices = ref([]);
-  
-  onMounted(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognition.value = new SpeechRecognition();
-      recognition.value.continuous = true;
-      recognition.value.interimResults = true;
-      
-      recognition.value.onresult = (event) => {
-        let interimTranscript = '';
-        
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            transcript.value += event.results[i][0].transcript;
-          } else {
-            interimTranscript += event.results[i][0].transcript;
-          }
-        }
-        
-        const fullTranscript = (transcript.value + interimTranscript).toUpperCase();
-        
-        promptWords.value.forEach((word, index) => {
-          if (fullTranscript.includes(word) && !spokenWordIndices.value.includes(index)) {
-            spokenWordIndices.value.push(index);
-          }
-        });
-        
-        if (spokenWordIndices.value.length === promptWords.value.length) {
-          stopRecording();
-        }
-      };
-      
-      recognition.value.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-      };
-    } else {
-      alert('Your browser does not support speech recognition. Please try a different browser.');
-    }
-  });
-  
-  const toggleRecording = () => {
-    isRecording.value = !isRecording.value;
-    
-    if (isRecording.value) {
-      startRecording();
-    } else {
-      stopRecording();
-    }
-  };
-  
-  const startRecording = () => {
-    if (recognition.value) {
-      transcript.value = '';
-      spokenWordIndices.value = [];
-      recognition.value.start();
-      console.log('Started recording');
-    }
-  };
-  
-  const stopRecording = () => {
-    if (recognition.value) {
-      recognition.value.stop();
-      isRecording.value = false;
-      hasRecorded.value = true;
-      console.log('Stopped recording');
-    }
-  };
+ import { ref, computed } from 'vue';
 
-  const complete = () => {
-    console.log('Analysis complete');
-  };
+// State
+const isRecording = ref(false);
+const hasRecorded = ref(false);
+const transcript = ref('');
+const recognition = ref(null);
+const promptText = "IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK";
+const promptWords = computed(() => promptText.split(' '));
+const spokenWordIndices = ref([]);
+
+// Audio recording variables
+const mediaRecorder = ref(null);
+const audioContext = ref(null);
+const audioStream = ref(null);
+const audioBlob = ref(null);
+const processorNode = ref(null);
+const recordedSamples = ref([]);
+
+// Only set up speech recognition, not audio permissions yet
+const setupSpeechRecognition = () => {
+  if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition.value = new SpeechRecognition();
+    recognition.value.continuous = true;
+    recognition.value.interimResults = true;
+    
+    recognition.value.onresult = (event) => {
+      let interimTranscript = '';
+      
+      for (let i = event.resultIndex; i < event.results.length; i++) {
+        if (event.results[i].isFinal) {
+          transcript.value += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
+        }
+      }
+      
+      const fullTranscript = (transcript.value + interimTranscript).toUpperCase();
+      
+      promptWords.value.forEach((word, index) => {
+        if (fullTranscript.includes(word) && !spokenWordIndices.value.includes(index)) {
+          spokenWordIndices.value.push(index);
+        }
+      });
+      
+      if (spokenWordIndices.value.length === promptWords.value.length) {
+        stopRecording();
+      }
+    };
+    
+    recognition.value.onerror = (event) => {
+      console.error('Speech recognition error:', event.error);
+    };
+  } else {
+    alert('Your browser does not support speech recognition. Please try a different browser.');
+  }
+};
+
+// WAV encoder function
+function encodeWAV(samples, sampleRate = 44100) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2);
+  const view = new DataView(buffer);
+
+  // RIFF identifier
+  writeString(view, 0, 'RIFF');
+  // File length
+  view.setUint32(4, 32 + samples.length * 2, true);
+  // RIFF type
+  writeString(view, 8, 'WAVE');
+  // Format chunk identifier
+  writeString(view, 12, 'fmt ');
+  // Format chunk length
+  view.setUint32(16, 16, true);
+  // Sample format (1 is PCM)
+  view.setUint16(20, 1, true);
+  // Channel count (1 for mono)
+  view.setUint16(22, 1, true);
+  // Sample rate
+  view.setUint32(24, sampleRate, true);
+  // Byte rate (SampleRate * NumChannels * BitsPerSample/8)
+  view.setUint32(28, sampleRate * 2, true);
+  // Block align (NumChannels * BitsPerSample/8)
+  view.setUint16(32, 2, true);
+  // Bits per sample
+  view.setUint16(34, 16, true);
+  // Data chunk identifier
+  writeString(view, 36, 'data');
+  // Data chunk length
+  view.setUint32(40, samples.length * 2, true);
+  
+  // Write the PCM samples
+  floatTo16BitPCM(view, 44, samples);
+  
+  return view.buffer;
+}
+
+function writeString(view, offset, string) {
+  for (let i = 0; i < string.length; i++) {
+    view.setUint8(offset + i, string.charCodeAt(i));
+  }
+}
+
+function floatTo16BitPCM(output, offset, input) {
+  for (let i = 0; i < input.length; i++, offset += 2) {
+    const s = Math.max(-1, Math.min(1, input[i]));
+    output.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+  }
+}
+
+const setupAudioRecording = async () => {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    audioStream.value = stream;
+    
+    // Create audio context with fixed sample rate for better compatibility
+    audioContext.value = new (window.AudioContext || window.webkitAudioContext)({
+      sampleRate: 44100 // Standard sample rate for good compatibility
+    });
+    
+    const source = audioContext.value.createMediaStreamSource(stream);
+    
+    // Create a script processor node to collect audio samples
+    const bufferSize = 4096;
+    const recorder = audioContext.value.createScriptProcessor(bufferSize, 1, 1);
+    
+    recorder.onaudioprocess = (e) => {
+      // Get mono channel data
+      const input = e.inputBuffer.getChannelData(0);
+      
+      // Clone the samples
+      const buffer = new Float32Array(input);
+      
+      // Add to our recorded samples
+      recordedSamples.value.push(buffer);
+    };
+    
+    // Connect the nodes
+    source.connect(recorder);
+    recorder.connect(audioContext.value.destination);
+    
+    // Store references
+    processorNode.value = recorder;
+    mediaRecorder.value = {
+      isRecording: true
+    };
+    
+    console.log('Audio recording setup complete with standard WAV parameters');
+    return true;
+  } catch (error) {
+    console.error('Error accessing microphone:', error);
+    alert('Unable to access your microphone. Please check permissions and try again.');
+    return false;
+  }
+};
+
+const toggleRecording = async () => {
+  if (!isRecording.value) {
+    // Setup speech recognition on first record attempt
+    if (!recognition.value) {
+      setupSpeechRecognition();
+    }
+    
+    // Request audio permissions only when user tries to record
+    const audioSetupSuccess = await setupAudioRecording();
+    if (!audioSetupSuccess) return;
+    
+    startRecording();
+  } else {
+    stopRecording();
+  }
+};
+
+const startRecording = () => {
+  isRecording.value = true;
+  recordedSamples.value = [];
+  
+  if (recognition.value) {
+    transcript.value = '';
+    spokenWordIndices.value = [];
+    recognition.value.start();
+  }
+  
+  console.log('Started recording audio and speech recognition');
+};
+
+const stopRecording = () => {
+  isRecording.value = false;
+  hasRecorded.value = true;
+  
+  if (recognition.value) {
+    recognition.value.stop();
+  }
+  
+  // Stop audio recording
+  if (processorNode.value) {
+    processorNode.value.disconnect();
+    
+    // Flatten all recorded sample buffers into a single Float32Array
+    let sampleLength = 0;
+    for (const buffer of recordedSamples.value) {
+      sampleLength += buffer.length;
+    }
+    
+    const mergedSamples = new Float32Array(sampleLength);
+    let offset = 0;
+    
+    for (const buffer of recordedSamples.value) {
+      mergedSamples.set(buffer, offset);
+      offset += buffer.length;
+    }
+    
+    // Encode as WAV
+    const wavBuffer = encodeWAV(mergedSamples, audioContext.value.sampleRate);
+    
+    // Create WAV blob
+    audioBlob.value = new Blob([wavBuffer], { type: 'audio/wav' });
+    
+    console.log('Stopped recording, created WAV file with size:', audioBlob.value.size, 'bytes');
+    
+    // Close tracks to release microphone
+    if (audioStream.value) {
+      audioStream.value.getTracks().forEach(track => track.stop());
+    }
+  }
+};
+
+const submitRecording = async () => {
+  if (!audioBlob.value) {
+    console.error('No audio recording available');
+    return;
+  }
+  
+  try {
+    console.log('Sending WAV file of size:', audioBlob.value.size, 'bytes');
+    
+    const formData = new FormData();
+    formData.append('file', audioBlob.value, 'recording.wav');
+    formData.append('transcript', transcript.value);
+    
+    console.log('Actual MIME type:', audioBlob.value.type);
+    const response = await fetch('https://5096-110-224-92-182.ngrok-free.app/analyze', {
+  method: 'POST',
+  body: formData,
+});
+
+if (response.ok) {
+  console.log('Recording submitted successfully');
+  
+  const blob = await response.blob();
+  
+  const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+  link.href = downloadUrl;
+  link.download = 'analysis.pdf'; 
+  link.target = '_blank';
+  
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  
+  // Clean up the URL object
+  window.URL.revokeObjectURL(downloadUrl);
+} else {
+  const errorText = await response.text();
+  console.error('Failed to submit recording:', errorText);
+  alert('Failed to submit recording: ' + errorText);
+}
+  } catch (error) {
+    console.error('Error submitting recording:', error);
+    alert('Error submitting recording. Please check your connection and try again.');
+  }
+};
   </script>
   
   <style scoped>
@@ -162,7 +354,7 @@
   }
   
   .spoken-word {
-    color: #EFC087;
+    color: #FFE5C6;
     transition: color 0.3s ease;
   }
   
