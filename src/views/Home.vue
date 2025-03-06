@@ -11,18 +11,18 @@
             <section class="all-tests-section">
                 <h2>ALL TESTS</h2>
                 <div class="test-boxes">
-                    <div class="test-box" @touchstart="isTouched = 'voice'" :class="{ active: isTouched == 'voice' }">
-                        <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'voice'">
+                    <div class="test-box" @touchstart="isTouched = 'voice'" :class="{ active: isTouched == 'voice' }" @click="$router.push('/voice')">
+                        <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'voice'">
                         <img src="../assets/voice.png" class="art">
-                        <h4 class="art-text">Voice Test</h4>
+                        <h4 class="art-text">Voice Analysis</h4>
                     </div>
                     <div class="test-box" @touchstart="isTouched = 'posture'" :class="{ active: isTouched == 'posture' }">
-                        <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'posture'">
+                        <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'posture'">
                         <img src="../assets/posture.png" class="art">
-                        <h4 class="art-text">Gait Analysis</h4>
+                        <h4 class="art-text">Scribble Test</h4>
                     </div>
                     <div class="test-box" @touchstart="isTouched = 'hand'" :class="{ active: isTouched == 'hand' }" @click="$router.push('/tremor')">
-                        <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'hand'">
+                        <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'hand'">
                         <img src="../assets/hand.png" class="art">
                         <h4 class="art-text">Tremor Detection</h4>
                     </div>

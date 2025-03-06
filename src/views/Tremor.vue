@@ -125,7 +125,6 @@ const startTest = async () => {
     hasStarted.value = "started"
     window.addEventListener('devicemotion', detectTremor)
     timer.value = setInterval(() => {
-      timeLeft.value--
       if (timeLeft.value > 0) {
       timeLeft.value--;
       if (analyse.value.length == 9) {
