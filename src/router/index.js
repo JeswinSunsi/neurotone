@@ -2,12 +2,12 @@ import { createWebHistory, createRouter } from 'vue-router'
 
 import HomeScreen from '../views/Home.vue'
 import StartScreen from '../views/Start.vue'
-import VoiceScreen from '../views/Voice.vue'
+import TremorScreen from '../views/Tremor.vue'
 
 const routes = [
   { path: '/', component: StartScreen },
   { path: '/home', component: HomeScreen },
-  { path: '/voice', component: VoiceScreen },
+  { path: '/tremor', component: TremorScreen },
 ]
 
 const router = createRouter({
