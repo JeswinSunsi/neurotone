@@ -14,12 +14,12 @@
                     <div class="test-box" @touchstart="isTouched = 'voice'" :class="{ active: isTouched == 'voice' }">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'voice'">
                         <img src="../assets/voice.png" class="art">
-                        <h4 class="art-text">Voice Test</h4>
+                        <h4 class="art-text">Voice Analysis</h4>
                     </div>
                     <div class="test-box" @touchstart="isTouched = 'posture'" :class="{ active: isTouched == 'posture' }">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'posture'">
                         <img src="../assets/posture.png" class="art">
-                        <h4 class="art-text">Gait Analysis</h4>
+                        <h4 class="art-text">Scribble Test</h4>
                     </div>
                     <div class="test-box" @touchstart="isTouched = 'hand'" :class="{ active: isTouched == 'hand' }" @click="$router.push('/tremor')">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-if="isTouched == 'hand'">
