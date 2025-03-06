@@ -100,11 +100,11 @@ const isTouched = ref('voice')
     padding-top: 2.4rem;
     padding-bottom: 1.5rem;
     text-align: center;
-    background-color: #D5DDBD;
+    background-color: #FFF0F5;
 }
 
 h1 {
-    color: #5C4231;
+    color: #eb4899;
     font-weight: 800;
     font-size: 1.5rem;
 }
@@ -122,7 +122,7 @@ h1 {
 }
 
 h2 {
-    color: #654321;
+    color: #5C4231;
     font-size: 1.2rem;
     font-weight: 800;
     margin-bottom: 1rem;
@@ -175,10 +175,10 @@ h2 {
 }
 
 .report-card {
-    background-color: #5C4231;
+    background-color: #3d2200;
     padding: 2.2rem 1.2rem;
     border-radius: 10px;
-    color: #C19A6B;
+    color: #e9c59a;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -198,8 +198,8 @@ h2 {
 }
 
 .download-button {
-    background-color: #C19A6B;
-    color: #694a32;
+    background-color: #e9c59a;
+    color: #5C4231;
     border: none;
     padding: 0.5rem 1.2rem;
     border-radius: 0.8rem;
@@ -221,7 +221,7 @@ h2 {
 }
 
 .app-footer {
-    background-color: #D5DDBD;
+    background-color: #FFF0F5;
     padding: 1rem 1rem;
 }
 
