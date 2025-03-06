@@ -5,7 +5,15 @@
       </div>
       
       <div class="prompt-box">
-        <p>IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK</p>
+        <p>
+          <span 
+            v-for="(word, index) in promptWords" 
+            :key="index"
+            :class="{ 'spoken-word': spokenWordIndices.includes(index) }"
+          >
+            {{ word }}{{ index < promptWords.length - 1 ? ' ' : '' }}
+          </span>
+        </p>
       </div>
       
       <div class="controls">
@@ -27,21 +35,64 @@
       </div>
       
       <Transition name="slide-up">
-      <div class="next-btn" v-if="hasRecorded" @click="">
-        CONTINUE
-      </div>
-    </Transition>
+        <div class="next-btn" v-if="hasRecorded" @click="complete">
+          CONTINUE
+        </div>
+      </Transition>
     </div>
   </template>
   
   <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   
   // State
   const isRecording = ref(false);
   const hasRecorded = ref(false);
+  const transcript = ref('');
+  const recognition = ref(null);
+  const promptText = "IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK";
+  const promptWords = computed(() => promptText.split(' '));
+  const spokenWordIndices = ref([]);
   
-  // Methods
+  onMounted(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition.value = new SpeechRecognition();
+      recognition.value.continuous = true;
+      recognition.value.interimResults = true;
+      
+      recognition.value.onresult = (event) => {
+        let interimTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) {
+            transcript.value += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+        
+        const fullTranscript = (transcript.value + interimTranscript).toUpperCase();
+        
+        promptWords.value.forEach((word, index) => {
+          if (fullTranscript.includes(word) && !spokenWordIndices.value.includes(index)) {
+            spokenWordIndices.value.push(index);
+          }
+        });
+        
+        if (spokenWordIndices.value.length === promptWords.value.length) {
+          stopRecording();
+        }
+      };
+      
+      recognition.value.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+    } else {
+      alert('Your browser does not support speech recognition. Please try a different browser.');
+    }
+  });
+  
   const toggleRecording = () => {
     isRecording.value = !isRecording.value;
     
@@ -49,27 +100,28 @@
       startRecording();
     } else {
       stopRecording();
-      hasRecorded.value = true;
     }
   };
   
   const startRecording = () => {
-    // Implementation for starting audio recording would go here
-    console.log('Started recording');
+    if (recognition.value) {
+      transcript.value = '';
+      spokenWordIndices.value = [];
+      recognition.value.start();
+      console.log('Started recording');
+    }
   };
   
   const stopRecording = () => {
-    // Implementation for stopping audio recording would go here
-    console.log('Stopped recording');
+    if (recognition.value) {
+      recognition.value.stop();
+      isRecording.value = false;
+      hasRecorded.value = true;
+      console.log('Stopped recording');
+    }
   };
-  
-  const goBack = () => {
-    // Handle navigation back
-    console.log('Navigating back');
-  };
-  
+
   const complete = () => {
-    // Handle completion of the voice analysis
     console.log('Analysis complete');
   };
   </script>
@@ -99,7 +151,7 @@
   
   .prompt-box {
     background-color: #5C4231;
-    color: #C19A6B;
+    color: rgba(193, 154, 107, 0.5);
     font-size: 1.7rem;
     font-weight: bold;
     text-align: center;
@@ -107,6 +159,11 @@
     padding: 4rem 1rem;
     border-radius: 0.9rem;
     line-height: 2.5rem;
+  }
+  
+  .spoken-word {
+    color: #EFC087;
+    transition: color 0.3s ease;
   }
   
   .controls {
@@ -140,33 +197,33 @@
     width: 2rem;
     margin-right: 1rem;
   }
-
+  
   .next-btn {
-  width: 100%;
-  position: fixed;
-  bottom: 0;
-  height: 4rem;
-  background-color: #eb4899;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  color: #FFF;
-  font-weight: 600;
-  font-size: 1.1rem;
-}
-
-.slide-up-enter-active,
-.slide-up-leave-active {
-  transition: transform 0.5s ease;
-}
-
-.slide-up-enter-from,
-.slide-up-leave-to {
-  transform: translateY(200%);
-}
-
-.slide-up-enter-to,
-.slide-up-leave-from {
-  transform: translateY(0);
-}
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+    height: 4rem;
+    background-color: #eb4899;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #FFF;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .slide-up-enter-active,
+  .slide-up-leave-active {
+    transition: transform 0.5s ease;
+  }
+  
+  .slide-up-enter-from,
+  .slide-up-leave-to {
+    transform: translateY(200%);
+  }
+  
+  .slide-up-enter-to,
+  .slide-up-leave-from {
+    transform: translateY(0);
+  }
   </style>
