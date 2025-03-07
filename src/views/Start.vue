@@ -3,15 +3,15 @@
     <div class="header">
       <h1>NEUROTONE</h1>
     </div>
-    
-        <img src="../assets/woman-meditating.png" alt="Neurotone Banner" class="woman">
-    
+
+    <img src="../assets/woman-meditating.png" alt="Neurotone Banner" class="woman">
+
     <div class="content">
       <p class="hope-text"><span class="emphasized">Hope</span> starts<br>
-      with <span class="emphasized">Early Detection</span></p>
+        with <span class="emphasized">Early Detection</span></p>
       <p class="subtitle">Simple Assessments for Potential Early Signs</p>
     </div>
-    
+
     <button class="analyze-button" @click="$router.push('/home')">
       Analyze Now <span class="arrow">→</span>
     </button>
@@ -24,8 +24,8 @@
 
 <style scoped>
 .neurotone-container {
-background-image: url('../assets/start-bg.png');
-background-size: cover;
+  background-image: url('../assets/start-bg.png');
+  background-size: cover;
   width: 100%;
   height: 100%;
   margin: 0 auto;

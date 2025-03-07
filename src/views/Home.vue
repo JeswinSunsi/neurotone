@@ -6,22 +6,31 @@
                 <h1>NEUROTONE</h1>
             </div>
 
-            <div class="brown-box"></div>
+            <Carousel v-bind="config" style="margin-bottom: 2rem; height: 13.4rem; border-radius: 0.8rem;">
+            <Slide v-for="image in images" :key="image.id" @click="$router.push(image.route)" style="padding: 0rem 1rem; height: 13.4rem; border-radius: 0.8rem;">
+                <div class="autoscroll-container" 
+                    :style='`background-image: url(${image.url}); background-size: cover; height: 100%; width: 100%; border-radius: 0.8rem;`'>
+                </div>
+            </Slide>
+        </Carousel>
 
             <section class="all-tests-section">
                 <h2>ALL TESTS</h2>
                 <div class="test-boxes">
-                    <div class="test-box" @touchstart="isTouched = 'voice'" :class="{ active: isTouched == 'voice' }" @click="$router.push('/voice')">
+                    <div class="test-box" @touchstart="isTouched = 'voice'" :class="{ active: isTouched == 'voice' }"
+                        @click="$router.push('/voice')">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'voice'">
                         <img src="../assets/voice.png" class="art">
                         <h4 class="art-text">Voice Analysis</h4>
                     </div>
-                    <div class="test-box" @touchstart="isTouched = 'posture'" :class="{ active: isTouched == 'posture' }">
+                    <div class="test-box" @touchstart="isTouched = 'posture'" @click="$router.push('/write')"
+                        :class="{ active: isTouched == 'posture' }">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'posture'">
                         <img src="../assets/posture.png" class="art">
                         <h4 class="art-text">Scribble Test</h4>
                     </div>
-                    <div class="test-box" @touchstart="isTouched = 'hand'" :class="{ active: isTouched == 'hand' }" @click="$router.push('/tremor')">
+                    <div class="test-box" @touchstart="isTouched = 'hand'" :class="{ active: isTouched == 'hand' }"
+                        @click="$router.push('/tremor')">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'hand'">
                         <img src="../assets/hand.png" class="art">
                         <h4 class="art-text">Tremor Detection</h4>
@@ -34,7 +43,7 @@
                 <div class="report-card">
                     <div class="report-date">04 FEB 2025</div>
                     <div class="report-title">COMPLETE TEST REPORT</div>
-                    <button class="download-button">
+                    <button class="download-button" @click="getRecentReport">
                         Download Now
                         <span class="down-arrow">↓</span>
                     </button>
@@ -73,8 +82,53 @@
 
 <script setup>
 import { ref } from 'vue';
+import 'vue3-carousel/dist/carousel.css';
+import { Carousel, Slide } from 'vue3-carousel';
+
+import cardImage1 from "../assets/banner.png"
+import cardImage2 from "../assets/banner2.png"
+import cardImage3 from "../assets/banner3.png"
 
 const isTouched = ref('voice')
+
+const images = [{ "id": 1, "url": cardImage2, "route": "/tremor" }, { "id": 2, "url": cardImage3, "route": "/write" }, { "id": 3, "url": cardImage1, "route": "/voice" }]
+
+async function getRecentReport(){
+    try {
+        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/report', {
+            method: 'GET',
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = 'analysis.pdf';
+            link.target = '_blank';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        } else {
+            const errorText = await response.text();
+            console.error('Failed to submit recording:', errorText);
+        }
+    } catch (error) {
+        console.error('Error fetching PDF:', error);
+    }
+}
+
+const config = {
+    height: 196,
+    itemsToShow: 1,
+    gap: 5,
+    autoplay: 3000,
+    wrapAround: true,
+    pauseAutoplayOnHover: true,
+};
+
 </script>
 
 <style scoped>

@@ -126,23 +126,23 @@ const startTest = async () => {
     window.addEventListener('devicemotion', detectTremor)
     timer.value = setInterval(() => {
       if (timeLeft.value > 0) {
-      timeLeft.value--;
-      if (analyse.value.length == 9) {
-        analyse.value = "Analysing."
-      }
-      else if (analyse.value.length == 10) {
-        analyse.value = "Analysing.."
-      }
-      else if (analyse.value.length == 11) {
-        analyse.value = "Analysing..."
-      }
-      else {
-        analyse.value = "Analysing"
-      }
-    }
-    if (timeLeft.value <= 0) {
-          endTest()
+        timeLeft.value--;
+        if (analyse.value.length == 9) {
+          analyse.value = "Analysing."
         }
+        else if (analyse.value.length == 10) {
+          analyse.value = "Analysing.."
+        }
+        else if (analyse.value.length == 11) {
+          analyse.value = "Analysing..."
+        }
+        else {
+          analyse.value = "Analysing"
+        }
+      }
+      if (timeLeft.value <= 0) {
+        endTest()
+      }
     }, 1000)
   }
 }
