@@ -28,7 +28,7 @@
         </div>
 
         <Transition name="slide-up">
-            <div class="next-btn" v-if="hasRecorded" @click="submitRecording">
+            <div class="next-btn" v-if="hasRecorded" @click="goToNextPrompt">
                 CONTINUE
             </div>
         </Transition>
@@ -43,11 +43,13 @@ const isRecording = ref(false);
 const hasRecorded = ref(false);
 const transcript = ref('');
 const recognition = ref(null);
-const promptText = "IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK";
-const promptWords = computed(() => promptText.split(' '));
+let promptText = "IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK";
+const promptWords = ref(promptText.split(' '))
 const spokenWordIndices = ref([]);
+let promptIndex = 0
 
-// Audio recording variables
+const promptContent = ref(["IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK", "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG", "{SCREAM WITHOUT MOVING YOUR LIPS}"])
+
 const mediaRecorder = ref(null);
 const audioContext = ref(null);
 const audioStream = ref(null);
@@ -55,7 +57,31 @@ const audioBlob = ref(null);
 const processorNode = ref(null);
 const recordedSamples = ref([]);
 
-// Only set up speech recognition, not audio permissions yet
+
+function goToNextPrompt() {
+    if (promptIndex < 2){
+        promptIndex++;
+        promptText = promptContent.value[promptIndex]
+        console.log(promptContent)
+        console.log(promptIndex)
+        console.log(promptText)
+        transcript.value = ""
+        recognition.value = null;
+        spokenWordIndices.value = [];
+        isRecording.value = false;
+        hasRecorded.value = false;
+        mediaRecorder.value = null
+        audioBlob.value = null;
+        audioContext.value = null;
+        audioStream.value = null;
+        processorNode.value = null;
+        promptWords.value = promptText.split(' ')
+    }
+    else {
+        submitRecording()
+    }
+}
+
 const setupSpeechRecognition = () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
