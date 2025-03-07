@@ -6,7 +6,13 @@
                 <h1>NEUROTONE</h1>
             </div>
 
-            <div class="brown-box"></div>
+            <Carousel v-bind="config" style="margin-bottom: 2rem; height: 13.4rem; border-radius: 0.8rem;">
+            <Slide v-for="image in images" :key="image.id" @click="$router.push(image.route)" style="padding: 0rem 1rem; height: 13.4rem; border-radius: 0.8rem;">
+                <div class="autoscroll-container" 
+                    :style='`background-image: url(${image.url}); background-size: cover; height: 100%; width: 100%; border-radius: 0.8rem;`'>
+                </div>
+            </Slide>
+        </Carousel>
 
             <section class="all-tests-section">
                 <h2>ALL TESTS</h2>
@@ -76,12 +82,20 @@
 
 <script setup>
 import { ref } from 'vue';
+import 'vue3-carousel/dist/carousel.css';
+import { Carousel, Slide } from 'vue3-carousel';
+
+import cardImage1 from "../assets/banner.png"
+import cardImage2 from "../assets/banner2.png"
+import cardImage3 from "../assets/banner3.png"
 
 const isTouched = ref('voice')
 
+const images = [{ "id": 1, "url": cardImage2, "route": "/tremor" }, { "id": 2, "url": cardImage3, "route": "/write" }, { "id": 3, "url": cardImage1, "route": "/voice" }]
+
 async function getRecentReport(){
     try {
-        const response = await fetch('https://c476-122-187-117-178.ngrok-free.app/report', {
+        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/report', {
             method: 'GET',
         });
 
@@ -105,6 +119,16 @@ async function getRecentReport(){
         console.error('Error fetching PDF:', error);
     }
 }
+
+const config = {
+    height: 196,
+    itemsToShow: 1,
+    gap: 5,
+    autoplay: 3000,
+    wrapAround: true,
+    pauseAutoplayOnHover: true,
+};
+
 </script>
 
 <style scoped>
