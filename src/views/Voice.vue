@@ -62,9 +62,7 @@ function goToNextPrompt() {
     if (promptIndex < 2){
         promptIndex++;
         promptText = promptContent.value[promptIndex]
-        console.log(promptContent)
-        console.log(promptIndex)
-        console.log(promptText)
+
         transcript.value = ""
         recognition.value = null;
         spokenWordIndices.value = [];
@@ -248,15 +246,12 @@ const stopRecording = () => {
             offset += buffer.length;
         }
 
-        // Encode as WAV
         const wavBuffer = encodeWAV(mergedSamples, audioContext.value.sampleRate);
 
-        // Create WAV blob
         audioBlob.value = new Blob([wavBuffer], { type: 'audio/wav' });
 
         console.log('Stopped recording, created WAV file with size:', audioBlob.value.size, 'bytes');
 
-        // Close tracks to release microphone
         if (audioStream.value) {
             audioStream.value.getTracks().forEach(track => track.stop());
         }
@@ -276,15 +271,12 @@ const submitRecording = async () => {
         formData.append('file', audioBlob.value, 'recording.wav');
         formData.append('transcript', transcript.value);
 
-        console.log('Actual MIME type:', audioBlob.value.type);
-        const response = await fetch('https://5096-110-224-92-182.ngrok-free.app/analyze', {
+        const response = await fetch('https://c476-122-187-117-178.ngrok-free.app/analyze', {
             method: 'POST',
             body: formData,
         });
 
         if (response.ok) {
-            console.log('Recording submitted successfully');
-
             const blob = await response.blob();
 
             const downloadUrl = window.URL.createObjectURL(blob);
