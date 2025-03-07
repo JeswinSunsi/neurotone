@@ -37,7 +37,7 @@
                 <div class="report-card">
                     <div class="report-date">04 FEB 2025</div>
                     <div class="report-title">COMPLETE TEST REPORT</div>
-                    <button class="download-button">
+                    <button class="download-button" @click="getRecentReport">
                         Download Now
                         <span class="down-arrow">↓</span>
                     </button>
@@ -78,6 +78,33 @@
 import { ref } from 'vue';
 
 const isTouched = ref('voice')
+
+async function getRecentReport(){
+    try {
+        const response = await fetch('https://c476-122-187-117-178.ngrok-free.app/report', {
+            method: 'GET',
+        });
+
+        if (response.ok) {
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = downloadUrl;
+            link.download = 'analysis.pdf';
+            link.target = '_blank';
+
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(downloadUrl);
+        } else {
+            const errorText = await response.text();
+            console.error('Failed to submit recording:', errorText);
+        }
+    } catch (error) {
+        console.error('Error fetching PDF:', error);
+    }
+}
 </script>
 
 <style scoped>
