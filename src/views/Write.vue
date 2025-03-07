@@ -49,8 +49,9 @@
             </div>
 
             <input type="file" ref="fileInput" accept="image/*" style="display: none;" @change="handleFileChange" />
+            <div class="submit-btn" :class="{ 'disabled': !hasImage, 'loading': isLoading }" @click="uploadImage">{{ isLoading ? 'Uploading...' : 'Upload Now' }}
+            </div>
         </div>
-
     </div>
 </template>
 
@@ -61,7 +62,8 @@ import { ref } from 'vue';
 const fileInput = ref(null);
 const imagePreview = ref('');
 const hasImage = ref(false);
-
+const isLoading = ref(false);
+const apiResponse = ref(null);
 // Methods
 const takePhoto = () => {
     // On mobile this would trigger the device camera
@@ -88,6 +90,42 @@ const handleFileChange = (event) => {
             hasImage.value = true;
         };
         reader.readAsDataURL(file);
+    }
+};
+
+const uploadImage = async () => {
+    if (!hasImage.value || isLoading.value) return;
+    
+    // Get the file from the input element
+    const file = fileInput.value.files[0];
+    if (!file) return;
+    
+    try {
+        isLoading.value = true;
+        
+        // Create FormData to send the file
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        // Make the API request
+        const response = await fetch('/write', {
+            method: 'POST',
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error(`API request failed with status ${response.status}`);
+        }
+        
+        // Parse and store the JSON response
+        const data = await response.json();
+        apiResponse.value = data;
+        
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        apiResponse.value = { error: error.message };
+    } finally {
+        isLoading.value = false;
     }
 };
 </script>
@@ -154,6 +192,16 @@ const handleFileChange = (event) => {
     margin-right: 0.4rem;
 }
 
+.submit-btn.disabled {
+    background-color: #7A6B5F;
+    cursor: not-allowed;
+}
+
+.submit-btn.loading {
+    background-color: #7A6B5F;
+    cursor: wait;
+}
+
 .photos-icon {
     height: 1.3rem;
     width: auto;
@@ -208,10 +256,22 @@ const handleFileChange = (event) => {
     font-size: 14px;
 }
 
+.submit-btn {
+    margin-top: 0.4rem;
+    border-radius: 0.6rem;
+    padding: 1rem 1rem;
+    background-color: #6d4c41;
+    font-weight: 600;
+    color: #FFF;
+    width: 45%;
+    text-align: center;
+}
+
 .image-preview {
     width: 100%;
     height: 12rem;
     background-color: #e0e0e0;
+    border-radius: 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
