@@ -271,7 +271,7 @@ const submitRecording = async () => {
         formData.append('file', audioBlob.value, 'recording.wav');
         formData.append('transcript', transcript.value);
 
-        const response = await fetch('https://c476-122-187-117-178.ngrok-free.app/analyze', {
+        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/analyze', {
             method: 'POST',
             body: formData,
         });

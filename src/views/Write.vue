@@ -51,6 +51,7 @@
             <input type="file" ref="fileInput" accept="image/*" style="display: none;" @change="handleFileChange" />
             <div class="submit-btn" :class="{ 'disabled': !hasImage, 'loading': isLoading }" @click="uploadImage">{{ isLoading ? 'Uploading...' : 'Upload Now' }}
             </div>
+            <div class="result" style="border: 1px #6d4c41 solid; padding: 1rem; width: 100%; border-radius: 0.8rem; height: 5rem; margin-top: 0.4rem;"></div>
         </div>
     </div>
 </template>
@@ -105,10 +106,10 @@ const uploadImage = async () => {
         
         // Create FormData to send the file
         const formData = new FormData();
-        formData.append('image', file);
+        formData.append('file', file);
         
         // Make the API request
-        const response = await fetch('/write', {
+        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/scribble', {
             method: 'POST',
             body: formData
         });
@@ -120,6 +121,7 @@ const uploadImage = async () => {
         // Parse and store the JSON response
         const data = await response.json();
         apiResponse.value = data;
+        console.log(apiResponse.value)
         
     } catch (error) {
         console.error('Error uploading image:', error);
