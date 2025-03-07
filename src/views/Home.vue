@@ -17,7 +17,7 @@
                         <img src="../assets/voice.png" class="art">
                         <h4 class="art-text">Voice Analysis</h4>
                     </div>
-                    <div class="test-box" @touchstart="isTouched = 'posture'"
+                    <div class="test-box" @touchstart="isTouched = 'posture'" @click="$router.push('/write')"
                         :class="{ active: isTouched == 'posture' }">
                         <img src="../assets/rotatedarrow.png" class="rotated-arrow" v-show="isTouched == 'posture'">
                         <img src="../assets/posture.png" class="art">
