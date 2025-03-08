@@ -95,7 +95,7 @@ const images = [{ "id": 1, "url": cardImage2, "route": "/tremor" }, { "id": 2, "
 
 async function getRecentReport(){
     try {
-        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/report', {
+        const response = await fetch('https://0c7d-2401-4900-634a-75aa-c873-f29a-c192-b077.ngrok-free.app/report', {
             method: 'GET',
         });
 

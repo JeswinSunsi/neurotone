@@ -32,7 +32,8 @@
                     sheet of paper and a ball-point pen for best results.
                 </p>
             </div>
-
+            <div class="result" v-if="apiResponse">RESULT: <span style="font-size: 1rem;">{{apiResponse.has_parkinsons ? "MILDLY HIGH PROBABILITY" : "LOW PROBABILITY"}}</span></div>
+            <div class="result" v-if="!apiResponse">RESULT: <span style="font-size: 1rem;">. . .</span></div>
             <div class="flex-wrapper">
                 <span
                     style="display: flex; width: 100%; justify-content: center; margin-bottom: 3rem; margin-top: 3rem;">
@@ -51,7 +52,6 @@
             <input type="file" ref="fileInput" accept="image/*" style="display: none;" @change="handleFileChange" />
             <div class="submit-btn" :class="{ 'disabled': !hasImage, 'loading': isLoading }" @click="uploadImage">{{ isLoading ? 'Uploading...' : 'Upload Now' }}
             </div>
-            <div class="result" style="border: 1px #6d4c41 solid; padding: 1rem; width: 100%; border-radius: 0.8rem; height: 5rem; margin-top: 0.4rem;"></div>
         </div>
     </div>
 </template>
@@ -109,7 +109,7 @@ const uploadImage = async () => {
         formData.append('file', file);
         
         // Make the API request
-        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/scribble', {
+        const response = await fetch('https://0c7d-2401-4900-634a-75aa-c873-f29a-c192-b077.ngrok-free.app/scribble', {
             method: 'POST',
             body: formData
         });
@@ -145,6 +145,12 @@ const uploadImage = async () => {
 
 .not-found {
     display: flex; flex-direction: column; justify-content: center; text-align: center; align-items: center; padding: 0.5rem;
+}
+
+.result {
+    width: 100%; border-radius: 0.8rem; margin-bottom: 0.8rem; margin-top: 0.4rem;
+    font-weight: 700;
+    font-size: 1.2rem;
 }
 
 .title {

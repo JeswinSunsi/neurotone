@@ -28,7 +28,7 @@
         </div>
 
         <Transition name="slide-up">
-            <div class="next-btn" v-if="hasRecorded" @click="goToNextPrompt">
+            <div class="next-btn" v-if="hasRecorded" @click="goToNextPrompt" :class="{loading: PDFLoading}">
                 CONTINUE
             </div>
         </Transition>
@@ -49,7 +49,7 @@ const spokenWordIndices = ref([]);
 let promptIndex = 0
 
 const promptContent = ref(["IT IS QUITE A PLEASANT AFTERNOON FOR A PROMENADE IN THE PARK", "THE QUICK BROWN FOX JUMPS OVER THE LAZY DOG", "{SCREAM WITHOUT MOVING YOUR LIPS}"])
-
+const PDFLoading = ref(false)
 const mediaRecorder = ref(null);
 const audioContext = ref(null);
 const audioStream = ref(null);
@@ -270,8 +270,8 @@ const submitRecording = async () => {
         const formData = new FormData();
         formData.append('file', audioBlob.value, 'recording.wav');
         formData.append('transcript', transcript.value);
-
-        const response = await fetch('https://6124-122-187-117-178.ngrok-free.app/analyze', {
+        PDFLoading.value = true;
+        const response = await fetch('https://0c7d-2401-4900-634a-75aa-c873-f29a-c192-b077.ngrok-free.app/analyze', {
             method: 'POST',
             body: formData,
         });
@@ -402,5 +402,9 @@ h1 {
 .slide-up-enter-to,
 .slide-up-leave-from {
     transform: translateY(0);
+}
+
+.loading {
+    background-color: #f5b4d3;
 }
 </style>

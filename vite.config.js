@@ -5,7 +5,7 @@ import vue from '@vitejs/plugin-vue'
 export default defineConfig({
   plugins: [vue()],
   server: {
-    allowedHosts: ['localhost', '2069-110-224-84-182.ngrok-free.app'],
+    allowedHosts: ['localhost', '7bbf-2401-4900-634a-75aa-d6c-f692-e399-752d.ngrok-free.app'],
     host: true, // This enables listening on all local IPs
   }
 })
